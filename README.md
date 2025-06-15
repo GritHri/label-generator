@@ -16,27 +16,33 @@ A web application that allows users to log in and generate printable delivery la
 
 ## Prerequisites
 
-- Node.js (v14 or higher)
-- npm (comes with Node.js)
+- Node.js 
+- npm 
+- git 
 
 ## Installation
 
 1. Clone the repository or download the source code
+
+```bash
+$ git clone https://github.com/GritHri/label-generator.git
+```
+
 2. Navigate to the project directory
+
+```bash
+$ cd label-generator
+```
+
 3. Install dependencies:
 
 ```bash
-npm install
+$ npm install
 ```
 
 ## Configuration
 
-The application uses environment variables for configuration. Create a `.env` file in the root directory with the following content:
-
-```
-PORT=3000
-SESSION_SECRET=your-session-secret
-```
+The application uses environment variables for configuration. Create a `.env` file in the root directory with the contents of **.env.example**. This step is not mandatory as there exist fallback for every import, but it is recommended to set the environment variables for production.
 
 ## Running the Application
 
@@ -46,7 +52,7 @@ SESSION_SECRET=your-session-secret
 npm run dev
 ```
 
-This will start the server with nodemon for automatic reloading.
+This will start the server with nodemon for automatic reloading. Any changes made to the code will hot reload.
 
 ### Production Mode
 
@@ -84,8 +90,3 @@ The application will be available at `http://localhost:3000`
 - pdfkit: PDF generation
 - bwip-js: Barcode generation
 - dotenv: Environment variable management
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
-# label-generator

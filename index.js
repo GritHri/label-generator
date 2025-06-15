@@ -160,14 +160,30 @@ app.get('/dashboard', requireAuth, (req, res) => {
  * - Cleans up temporary barcode image
  */
 app.post('/generate-label', requireAuth, async (req, res) => {
+    let barcodePath;
     try {
         const { senderName, senderAddress, receiverName, receiverAddress } = req.body;
-        // Generate a unique delivery ID using Node's built-in crypto module
+        
+        // Validate required fields
+        if (!senderName || !receiverName) {
+            console.error('Missing required fields');
+            return res.status(400).send('Missing required fields');
+        }
+
+        // Ensure barcodes directory exists
+        const barcodeDir = path.join(__dirname, 'public', 'barcodes');
+        if (!fs.existsSync(barcodeDir)) {
+            fs.mkdirSync(barcodeDir, { recursive: true });
+        }
+
+        // Generate a unique delivery ID
         const deliveryId = crypto.randomUUID();
-        const barcodePath = path.join('public', 'barcodes', `${deliveryId}.png`);
+        barcodePath = path.join(barcodeDir, `${deliveryId}.png`);
+        
+        console.log('Starting barcode generation for:', deliveryId);
         
         // Generate barcode
-        await new Promise((resolve, reject) => {
+        const png = await new Promise((resolve, reject) => {
             bwipjs.toBuffer({
                 bcid: 'code128',
                 text: deliveryId,
@@ -176,46 +192,108 @@ app.post('/generate-label', requireAuth, async (req, res) => {
                 includetext: true,
                 textxalign: 'center',
             }, (err, png) => {
-                if (err) return reject(err);
-                fs.writeFileSync(barcodePath, png);
-                resolve();
+                if (err) {
+                    console.error('Barcode generation error:', err);
+                    return reject(new Error('Failed to generate barcode'));
+                }
+                resolve(png);
             });
         });
+
+        // Write barcode to file
+        await fs.promises.writeFile(barcodePath, png);
+        console.log('Barcode generated at:', barcodePath);
         
         // Create PDF
+        console.log('Starting PDF generation');
         const doc = new PDFDocument({ margin: 50 });
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="delivery-label-${deliveryId}.pdf"`);
         
-        doc.pipe(res);
-        
-        // Add content to PDF
-        doc.fontSize(20).text('DELIVERY LABEL', { align: 'center' });
-        doc.moveDown();
-        
-        // Sender info
-        doc.fontSize(14).text('From:', { underline: true });
-        doc.fontSize(12).text(senderName);
-        doc.text(senderAddress);
-        doc.moveDown();
-        
-        // Receiver info
-        doc.fontSize(14).text('To:', { underline: true });
-        doc.fontSize(12).text(receiverName);
-        doc.text(receiverAddress);
-        doc.moveDown();
-        
-        // Delivery ID and barcode
-        doc.fontSize(12).text(`Delivery ID: ${deliveryId}`);
-        doc.image(barcodePath, { fit: [300, 100], align: 'center' });
-        
-        // Finalize PDF and clean up
-        doc.end(() => {
-            // Delete the temporary barcode file after the PDF is sent
-            fs.unlink(barcodePath, (err) => {
-                if (err) console.error('Error deleting barcode file:', err);
+        try {
+            // Set response headers
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="delivery-label-${deliveryId}.pdf"`);
+            
+            // Set a timeout for the response
+            res.setTimeout(30000, () => {
+                console.error('PDF generation timeout');
+                if (!res.headersSent) {
+                    res.status(500).send('PDF generation timed out');
+                }
+                doc.end();
             });
-        });
+            
+            // Handle PDF generation errors
+            doc.on('error', (err) => {
+                console.error('PDF generation error:', err);
+                if (!res.headersSent) {
+                    res.status(500).send('Error generating PDF');
+                }
+            });
+            
+            // Pipe the PDF to the response
+            doc.pipe(res);
+            
+            // Add content to PDF
+            doc.fontSize(20).text('DELIVERY LABEL', { align: 'center' });
+            doc.moveDown();
+            
+            // Sender info
+            doc.fontSize(14).text('From:', { underline: true });
+            doc.fontSize(12).text(senderName || 'N/A');
+            doc.text(senderAddress || 'N/A');
+            doc.moveDown();
+            
+            // Receiver info
+            doc.fontSize(14).text('To:', { underline: true });
+            doc.fontSize(12).text(receiverName || 'N/A');
+            doc.text(receiverAddress || 'N/A');
+            doc.moveDown();
+            
+            // Delivery ID and barcode
+            doc.fontSize(12).text(`Delivery ID: ${deliveryId}`);
+            
+            // Add barcode image if it exists
+            try {
+                if (fs.existsSync(barcodePath)) {
+                    doc.image(barcodePath, { 
+                        fit: [300, 100], 
+                        align: 'center',
+                        // Handle potential image loading errors
+                        validate: true
+                    });
+                } else {
+                    console.warn('Barcode file not found, skipping barcode in PDF');
+                    doc.text('Barcode not available', { align: 'center' });
+                }
+            } catch (imgErr) {
+                console.error('Error adding barcode to PDF:', imgErr);
+                doc.text('Error generating barcode', { align: 'center' });
+            }
+            
+            // Finalize PDF
+            doc.end();
+            console.log('PDF generation completed');
+            
+        } catch (pdfErr) {
+            console.error('PDF generation failed:', pdfErr);
+            if (!res.headersSent) {
+                res.status(500).send('Error generating PDF');
+            }
+            doc.end();
+        } finally {
+            // Clean up barcode file after a short delay to ensure PDF is generated first
+            if (barcodePath && fs.existsSync(barcodePath)) {
+                setTimeout(() => {
+                    fs.unlink(barcodePath, (err) => {
+                        if (err) {
+                            console.error('Error deleting barcode file:', err);
+                        } else {
+                            console.log('Cleaned up barcode file:', barcodePath);
+                        }
+                    });
+                }, 5000); // 5 second delay
+            }
+        }
         
     } catch (error) {
         console.error('Error generating label:', error);

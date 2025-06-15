@@ -25,19 +25,19 @@ A web application that allows users to log in and generate printable delivery la
 1. Clone the repository or download the source code
 
 ```bash
-$ git clone https://github.com/GritHri/label-generator.git
+git clone https://github.com/GritHri/label-generator.git
 ```
 
 2. Navigate to the project directory
 
 ```bash
-$ cd label-generator
+cd label-generator
 ```
 
 3. Install dependencies:
 
 ```bash
-$ npm install
+npm install
 ```
 
 ## Configuration

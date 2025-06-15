@@ -90,3 +90,7 @@ The application will be available at `http://localhost:3000`
 - pdfkit: PDF generation
 - bwip-js: Barcode generation
 - dotenv: Environment variable management
+
+## Softskills Analysis
+
+https://github.com/GritHri/label-generator/issues/1

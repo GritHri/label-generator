@@ -19,16 +19,25 @@ const PORT = process.env.PORT || 3000;
 
 /**
  * Session Configuration
- * - secret: Used to sign the session ID cookie
+ * - secret: Used to sign the session ID cookie (use a strong secret in production)
  * - resave: Forces the session to be saved back to the session store
  * - saveUninitialized: Forces a session that is "uninitialized" to be saved to the store
+ * - proxy: Trust the reverse proxy (needed for secure cookies in production)
  * - cookie.secure: Ensures cookies are only sent over HTTPS in production
+ * - cookie.sameSite: 'lax' for CSRF protection
  */
+app.set('trust proxy', 1); // Trust first proxy
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === 'production' }
+    proxy: true,
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
 }));
 
 /**

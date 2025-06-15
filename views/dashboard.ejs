@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Delivery Label Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-semibold text-gray-900">Delivery Label Generator</h1>
+                </div>
+                <div class="flex items-center">
+                    <form action="/logout" method="POST">
+                        <button 
+                            type="submit"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6">
+                <h2 class="text-lg leading-6 font-medium text-gray-900">Create New Delivery Label</h2>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Fill in the details below to generate a delivery label.</p>
+            </div>
+            
+            <form action="/generate-label" method="POST" class="border-t border-gray-200 px-4 py-5 sm:p-0">
+                <div class="space-y-6 sm:space-y-5">
+                    <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5 px-4 py-5 sm:px-6">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">Sender Information</h3>
+                            <p class="mt-1 text-sm text-gray-500">Who is sending this package?</p>
+                        </div>
+                        <div class="mt-1 sm:mt-0 sm:col-span-2 space-y-4">
+                            <div>
+                                <label for="senderName" class="block text-sm font-medium text-gray-700">Name</label>
+                                <input 
+                                    type="text" 
+                                    name="senderName" 
+                                    id="senderName" 
+                                    required
+                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    value="John Doe"
+                                >
+                            </div>
+                            <div>
+                                <label for="senderAddress" class="block text-sm font-medium text-gray-700">Address</label>
+                                <textarea 
+                                    id="senderAddress" 
+                                    name="senderAddress" 
+                                    rows="3" 
+                                    required
+                                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full border border-gray-300 rounded-md sm:text-sm p-2"
+                                >123 Main St, Anytown, USA 12345</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5 px-4 py-5 sm:px-6">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">Recipient Information</h3>
+                            <p class="mt-1 text-sm text-gray-500">Who is receiving this package?</p>
+                        </div>
+                        <div class="mt-1 sm:mt-0 sm:col-span-2 space-y-4">
+                            <div>
+                                <label for="receiverName" class="block text-sm font-medium text-gray-700">Name</label>
+                                <input 
+                                    type="text" 
+                                    name="receiverName" 
+                                    id="receiverName" 
+                                    required
+                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    value="Jane Smith"
+                                >
+                            </div>
+                            <div>
+                                <label for="receiverAddress" class="block text-sm font-medium text-gray-700">Address</label>
+                                <textarea 
+                                    id="receiverAddress" 
+                                    name="receiverAddress" 
+                                    rows="3" 
+                                    required
+                                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full border border-gray-300 rounded-md sm:text-sm p-2"
+                                >456 Oak Ave, Somewhere, CA 90210</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-5 border-t border-gray-200 px-4 py-5 sm:px-6">
+                        <div class="flex justify-end">
+                            <button 
+                                type="submit" 
+                                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                                Generate Label
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
